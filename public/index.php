@@ -1,3 +1,8 @@
+use Xerpia\Modules\Product\Adapter\Web\ProductListController;
+use Xerpia\Modules\Product\Adapter\Web\UpdateProductController;
+use Xerpia\Modules\Product\Adapter\Web\DeleteProductController;
+use Xerpia\Modules\Product\Infrastructure\Persistence\MariaDbProductListRepository;
+use Xerpia\Modules\Product\Infrastructure\Persistence\MariaDbProductRepositoryExtended;
 <?php
 use Xerpia\Modules\Provider\Infrastructure\Persistence\MariaDbProviderListRepository;
 use Xerpia\Modules\Provider\Adapter\Web\ProviderListController;
@@ -41,6 +46,13 @@ $productRepository = new Xerpia\Modules\Product\Infrastructure\Persistence\Maria
 $registerProduct = new Xerpia\Modules\Product\Application\UseCase\RegisterProduct($productRepository);
 $productController = new Xerpia\Modules\Product\Adapter\Web\ProductController($registerProduct);
 
+// Instancias para listar, actualizar y eliminar productos
+$productListRepository = new MariaDbProductListRepository($db->getPdo());
+$productListController = new ProductListController($productListRepository);
+$productRepositoryExtended = new MariaDbProductRepositoryExtended($db->getPdo());
+$updateProductController = new UpdateProductController($productRepositoryExtended);
+$deleteProductController = new DeleteProductController($productRepositoryExtended);
+
 // Instancias para consulta de proveedores
 $providerReadRepository = new MariaDbProviderReadRepository($db->getPdo());
 $providerQueryController = new ProviderQueryController($providerReadRepository);
@@ -63,11 +75,23 @@ $registerUserController = new Xerpia\Modules\User\Adapter\Web\RegisterUserContro
 
 // Enrutador extensible
 $routes = [
+    // Listar productos con paginación y filtros
+    'GET /products' => function($request) use ($productListController) {
+        return $productListController->list($request);
+    },
     'POST /login' => function($request) use ($loginController) {
         return $loginController->login($request);
     },
     'POST /products' => function($request) use ($productController) {
         return $productController->register($request);
+    },
+    // Actualizar producto
+    'PUT /products' => function($request) use ($updateProductController) {
+        return $updateProductController->update($request);
+    },
+    // Eliminar producto
+    'DELETE /products' => function($request) use ($deleteProductController) {
+        return $deleteProductController->delete($request);
     },
     'POST /users' => function($request) use ($registerUserController) {
         return $registerUserController->register($request);

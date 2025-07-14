@@ -8,29 +8,56 @@ ERP modular en PHP 8.2, arquitectura hexagonal, SOLID, MariaDB, Docker, Composer
 - src/Shared: Utilidades y recursos compartidos
 - src/Plugins: Plugins vía Composer
 - config: Configuración
-- public: Punto de entrada web
-- docker: Docker y docker-compose
-- tests: Pruebas
 
-## Docker
-- PHP 8.2 + Apache
-- MariaDB
-
-## Composer
-- PSR-4 autoload
-- Plugins y dependencias
-
-## Escalabilidad
-- Modularidad por paquetes
-- Hexagonal: separación de dominio, aplicación, infraestructura y adaptadores
-
-## Ejecución
 1. Instala dependencias:
-   ```powershell
+   ```bash
    composer install
    ```
-2. Levanta el entorno:
-   ```powershell
+2. Configura la base de datos en `config/database.php`.
+3. Ejecuta migraciones SQL (ver sección SQL).
+4. Levanta el servidor:
+   ```bash
+   php -S localhost:8000 -t public
+   ```
+5. Prueba los endpoints con Postman o tu frontend.
+
+## Endpoints principales
+
+- POST /login
+- POST /products
+- GET /products (paginación, filtros)
+- PUT /products
+- DELETE /products
+- CRUD proveedores
+- CRUD usuarios/roles
+
+---
+
+## 📚 Documentación extendida
+
+Para ejemplos de uso, flujos de autenticación, detalles de validaciones y arquitectura, consulta el **Wiki** del repositorio:
+
+- [Wiki de xerpia](./wiki)
+
+### Sugerencia de estructura para el Wiki
+
+- **Introducción y visión general**
+- **Guía de instalación y despliegue**
+- **Autenticación y JWT**
+- **Módulo Usuarios y Roles**
+- **Módulo Productos**
+  - Registro, listado, actualización, eliminación
+  - Ejemplos de request/response
+  - Paginación y filtros
+- **Módulo Proveedores**
+  - CRUD, asociación productos-proveedores
+- **Esquemas SQL y migraciones**
+- **Arquitectura hexagonal y patrones**
+- **Preguntas frecuentes (FAQ)**
+
+---
+
+¿Quieres que te ayude a crear la primera página del Wiki o a migrar ejemplos detallados?
    docker-compose -f docker/docker-compose.yml up --build
    ```
 3. Accede a http://localhost:8080
