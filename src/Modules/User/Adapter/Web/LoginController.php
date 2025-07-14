@@ -2,6 +2,7 @@
 namespace Xerpia\Modules\User\Adapter\Web;
 
 use Xerpia\Modules\User\Application\UseCase\LoginUser;
+use Xerpia\Modules\User\Adapter\Web\Dto\LoginUserDto;
 use Exception;
 
 class LoginController
@@ -15,19 +16,19 @@ class LoginController
 
     public function login(array $request): array
     {
-        $username = $request['username'] ?? '';
-        $password = $request['password'] ?? '';
-        if (!$username || !$password) {
+        $dto = new LoginUserDto($request);
+        $errors = $dto->isValid();
+        if ($errors) {
             return [
                 'status' => 400,
-                'body' => ['error' => 'Username and password required']
+                'body' => ['errors' => $errors]
             ];
         }
-        $token = $this->loginUser->execute($username, $password);
+        $token = $this->loginUser->execute($dto->username, $dto->password);
         if (!$token) {
             return [
                 'status' => 401,
-                'body' => ['error' => 'Invalid credentials']
+                'body' => ['error' => 'Credenciales inválidas']
             ];
         }
         return [

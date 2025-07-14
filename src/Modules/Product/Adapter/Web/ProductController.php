@@ -2,6 +2,7 @@
 namespace Xerpia\Modules\Product\Adapter\Web;
 
 use Xerpia\Modules\Product\Application\UseCase\RegisterProduct;
+use Xerpia\Modules\Product\Adapter\Web\Dto\RegisterProductDto;
 
 class ProductController {
     private RegisterProduct $registerProduct;
@@ -10,11 +11,19 @@ class ProductController {
         $this->registerProduct = $registerProduct;
     }
 
-    public function register(array $data): void {
-        $name = $data['name'];
-        $price = $data['price'];
-        $stock = $data['stock'];
-        $this->registerProduct->execute($name, $price, $stock);
-        echo "Producto registrado";
+    public function register(array $data): array {
+        $dto = new RegisterProductDto($data);
+        $errors = $dto->isValid();
+        if ($errors) {
+            return [
+                'status' => 400,
+                'body' => ['errors' => $errors]
+            ];
+        }
+        $this->registerProduct->execute($dto->name, $dto->price, $dto->stock);
+        return [
+            'status' => 201,
+            'body' => ['message' => 'Producto registrado']
+        ];
     }
 }

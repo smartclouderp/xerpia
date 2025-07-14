@@ -2,6 +2,7 @@
 namespace Xerpia\Modules\User\Adapter\Web;
 
 use Xerpia\Modules\User\Application\UseCase\RegisterUser;
+use Xerpia\Modules\User\Adapter\Web\Dto\RegisterUserDto;
 
 class RegisterUserController
 {
@@ -14,16 +15,15 @@ class RegisterUserController
 
     public function register(array $request): array
     {
-        $username = $request['username'] ?? '';
-        $password = $request['password'] ?? '';
-        $roles = $request['roles'] ?? [];
-        if (!$username || !$password || empty($roles)) {
+        $dto = new RegisterUserDto($request);
+        $errors = $dto->isValid();
+        if ($errors) {
             return [
                 'status' => 400,
-                'body' => ['error' => 'Username, password y roles son requeridos']
+                'body' => ['errors' => $errors]
             ];
         }
-        $result = $this->registerUser->execute($username, $password, $roles);
+        $result = $this->registerUser->execute($dto->username, $dto->password, $dto->roles);
         if ($result) {
             return [
                 'status' => 201,

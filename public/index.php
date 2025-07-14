@@ -41,18 +41,7 @@ $routes = [
         return $loginController->login($request);
     },
     'POST /products' => function($request) use ($productController) {
-        // Validación básica
-        if (!isset($request['name'], $request['price'], $request['stock'])) {
-            return [
-                'status' => 400,
-                'body' => ['error' => 'Faltan datos del producto']
-            ];
-        }
-        $productController->register($request);
-        return [
-            'status' => 201,
-            'body' => ['message' => 'Producto registrado']
-        ];
+        return $productController->register($request);
     },
     'POST /users' => function($request) use ($registerUserController) {
         return $registerUserController->register($request);
@@ -83,6 +72,7 @@ if (isset($routes[$key])) {
     http_response_code($response['status']);
     header('Content-Type: application/json');
     echo json_encode($response['body']);
+    // Solo se imprime el JSON, sin variables extra
 } else {
     http_response_code(404);
     header('Content-Type: application/json');
