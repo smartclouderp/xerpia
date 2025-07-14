@@ -1,0 +1,18 @@
+{
+    "name": "xerpia/xerpia",
+    "description": "ERP modular basado en arquitectura hexagonal, PHP 8.2, MariaDB, Docker, Composer plugins.",
+    "type": "project",
+    "require": {
+        "php": ">=8.2"
+    },
+    "autoload": {
+        "psr-4": {
+            "Xerpia\\Core\\": "src/Core/",
+            "Xerpia\\Modules\\": "src/Modules/",
+            "Xerpia\\Shared\\": "src/Shared/",
+            "Xerpia\\Plugins\\": "src/Plugins/"
+        }
+    },
+    "minimum-stability": "stable",
+    "prefer-stable": true
+}
