@@ -24,4 +24,17 @@ class MariaDbUserRepository implements UserRepositoryInterface
         }
         return new User($row['id'], $row['username'], $row['password_hash']);
     }
+    public function findAll(): array
+    {
+        $stmt = $this->pdo->query('SELECT id, username, email FROM users');
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
+
+    public function findById(int $id): ?array
+    {
+        $stmt = $this->pdo->prepare('SELECT id, username, email FROM users WHERE id = ?');
+        $stmt->execute([$id]);
+        $row = $stmt->fetch(PDO::FETCH_ASSOC);
+        return $row ?: null;
+    }
 }

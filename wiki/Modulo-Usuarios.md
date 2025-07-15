@@ -4,6 +4,7 @@ Documentación detallada para la gestión de usuarios y roles en xerpia.
 
 ## Endpoints
 
+
 ### Registrar usuario
 - **POST /users**
 - Requiere autenticación (Bearer JWT, rol admin)
@@ -28,6 +29,71 @@ Documentación detallada para la gestión de usuarios y roles en xerpia.
     "errors": {
       "username": "El usuario ya existe"
     }
+  }
+  ```
+
+### Listar todos los usuarios
+- **GET /users**
+- Requiere autenticación (Bearer JWT, rol admin)
+- Respuesta ejemplo:
+  ```json
+  {
+    "data": [
+      { "id": 1, "username": "admin", "email": "admin@demo.com" },
+      { "id": 2, "username": "editor", "email": "editor@demo.com" }
+    ]
+  }
+  ```
+
+### Obtener usuario por id
+- **GET /users/id**
+- Requiere autenticación (Bearer JWT, rol admin)
+- Body ejemplo:
+  ```json
+  {
+    "id": 2
+  }
+  ```
+- Respuesta ejemplo:
+  ```json
+  {
+    "id": 2,
+    "username": "editor",
+    "email": "editor@demo.com"
+  }
+  ```
+
+### Actualizar usuario
+- **PUT /users**
+- Requiere autenticación (Bearer JWT, rol admin)
+- Body ejemplo:
+  ```json
+  {
+    "id": 2,
+    "email": "nuevo@demo.com",
+    "password": "nuevaClave123"
+  }
+  ```
+- Respuesta exitosa:
+  ```json
+  {
+    "message": "Usuario actualizado"
+  }
+  ```
+
+### Eliminar usuario
+- **DELETE /users**
+- Requiere autenticación (Bearer JWT, rol admin)
+- Body ejemplo:
+  ```json
+  {
+    "id": 2
+  }
+  ```
+- Respuesta exitosa:
+  ```json
+  {
+    "message": "Usuario eliminado"
   }
   ```
 

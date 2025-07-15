@@ -32,4 +32,35 @@ class MariaDbUserWriteRepository implements UserWriteRepositoryInterface
             return false;
         }
     }
+
+    public function update(int $id, array $data): bool
+    {
+        $fields = [];
+        $params = [];
+        if (isset($data['username'])) {
+            $fields[] = 'username = ?';
+            $params[] = $data['username'];
+        }
+        if (isset($data['password'])) {
+            $fields[] = 'password_hash = ?';
+            $params[] = password_hash($data['password'], PASSWORD_DEFAULT);
+        }
+        if (isset($data['email'])) {
+            $fields[] = 'email = ?';
+            $params[] = $data['email'];
+        }
+        if (empty($fields)) {
+            return false;
+        }
+        $params[] = $id;
+        $sql = 'UPDATE users SET ' . implode(', ', $fields) . ' WHERE id = ?';
+        $stmt = $this->pdo->prepare($sql);
+        return $stmt->execute($params);
+    }
+
+    public function delete(int $id): bool
+    {
+        $stmt = $this->pdo->prepare('DELETE FROM users WHERE id = ?');
+        return $stmt->execute([$id]);
+    }
 }

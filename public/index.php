@@ -1,4 +1,12 @@
 <?php
+use Xerpia\Modules\User\Application\UseCase\UpdateUser;
+use Xerpia\Modules\User\Application\UseCase\DeleteUser;
+use Xerpia\Modules\User\Application\UseCase\GetAllUsers;
+use Xerpia\Modules\User\Application\UseCase\GetUserById;
+use Xerpia\Modules\User\Adapter\Web\UpdateUserController;
+use Xerpia\Modules\User\Adapter\Web\DeleteUserController;
+use Xerpia\Modules\User\Adapter\Web\GetAllUsersController;
+use Xerpia\Modules\User\Adapter\Web\GetUserByIdController;
 use Firebase\JWT\JWT;
 use Firebase\JWT\Key;
 use Xerpia\Modules\Product\Adapter\Web\ProductListController;
@@ -75,6 +83,16 @@ $userWriteRepository = new Xerpia\Modules\User\Infrastructure\Persistence\MariaD
 $registerUser = new Xerpia\Modules\User\Application\UseCase\RegisterUser($userWriteRepository);
 $registerUserController = new Xerpia\Modules\User\Adapter\Web\RegisterUserController($registerUser);
 
+// Instancias para update, delete, getAll, getById de usuarios
+$updateUser = new UpdateUser($userWriteRepository);
+$updateUserController = new UpdateUserController($updateUser);
+$deleteUser = new DeleteUser($userWriteRepository);
+$deleteUserController = new DeleteUserController($deleteUser);
+$getAllUsers = new GetAllUsers($userRepository);
+$getAllUsersController = new GetAllUsersController($getAllUsers);
+$getUserById = new GetUserById($userRepository);
+$getUserByIdController = new GetUserByIdController($getUserById);
+
 // Enrutador extensible
 $routes = [
     // Listar productos con paginación y filtros
@@ -97,6 +115,43 @@ $routes = [
     },
     'POST /users' => function($request) use ($registerUserController) {
         return $registerUserController->register($request);
+    },
+    // Actualizar usuario
+    'PUT /users' => function($request) use ($updateUserController) {
+        $id = isset($request['id']) ? (int)$request['id'] : 0;
+        if ($id <= 0) {
+            return [
+                'status' => 400,
+                'body' => ['error' => 'Id de usuario requerido y válido']
+            ];
+        }
+        return $updateUserController->update($id, $request);
+    },
+    // Eliminar usuario
+    'DELETE /users' => function($request) use ($deleteUserController) {
+        $id = isset($request['id']) ? (int)$request['id'] : 0;
+        if ($id <= 0) {
+            return [
+                'status' => 400,
+                'body' => ['error' => 'Id de usuario requerido y válido']
+            ];
+        }
+        return $deleteUserController->delete($id);
+    },
+    // Listar todos los usuarios
+    'GET /users' => function() use ($getAllUsersController) {
+        return $getAllUsersController->get();
+    },
+    // Obtener usuario por id
+    'GET /users/id' => function($request) use ($getUserByIdController) {
+        $id = isset($request['id']) ? (int)$request['id'] : 0;
+        if ($id <= 0) {
+            return [
+                'status' => 400,
+                'body' => ['error' => 'Id de usuario requerido y válido']
+            ];
+        }
+        return $getUserByIdController->get($id);
     },
     'POST /providers' => function($request) use ($registerProviderController) {
         return $registerProviderController->register($request);
