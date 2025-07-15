@@ -1,4 +1,6 @@
 <?php
+use Firebase\JWT\JWT;
+use Firebase\JWT\Key;
 use Xerpia\Modules\Product\Adapter\Web\ProductListController;
 use Xerpia\Modules\Product\Adapter\Web\UpdateProductController;
 use Xerpia\Modules\Product\Adapter\Web\DeleteProductController;
@@ -146,12 +148,46 @@ $key = $method . ' ' . $endpoint;
 $requestBody = file_get_contents('php://input');
 $request = json_decode($requestBody, true) ?? [];
 
+// Función para verificar JWT
+function verify_jwt($jwtSecret) {
+    $headers = getallheaders();
+    if (!isset($headers['Authorization'])) {
+        return false;
+    }
+    $authHeader = $headers['Authorization'];
+    if (strpos($authHeader, 'Bearer ') !== 0) {
+        return false;
+    }
+    $jwt = trim(substr($authHeader, 7));
+    try {
+        $decoded = JWT::decode($jwt, new Key($jwtSecret, 'HS256'));
+        return (array)$decoded;
+    } catch (Exception $e) {
+        return false;
+    }
+}
+
+// Endpoints públicos (no requieren autenticación)
+$publicEndpoints = [
+    'POST /login',
+];
+
 if (isset($routes[$key])) {
+    // Verifica JWT si el endpoint no es público
+    if (!in_array($key, $publicEndpoints)) {
+        $jwtPayload = verify_jwt($jwtSecret);
+        if (!$jwtPayload) {
+            http_response_code(401);
+            header('Content-Type: application/json');
+            echo json_encode(['error' => 'Token inválido o ausente']);
+            exit;
+        }
+        // Puedes pasar $jwtPayload al controlador si lo necesitas
+    }
     $response = $routes[$key]($request);
     http_response_code($response['status']);
     header('Content-Type: application/json');
     echo json_encode($response['body']);
-    // Solo se imprime el JSON, sin variables extra
 } else {
     http_response_code(404);
     header('Content-Type: application/json');
