@@ -89,7 +89,7 @@ class MariaDbJournalEntryLineRepository implements JournalEntryLineRepositoryInt
 
     public function findByFilters(?string $dateFrom = null, ?string $dateTo = null, ?int $accountId = null, ?int $thirdPartyId = null): array
     {
-        $query = 'SELECT jel.* FROM journal_entry_lines jel INNER JOIN journal_entries je ON jel.journal_entry_id = je.id WHERE 1=1';
+        $query = 'SELECT jel.*, je.date FROM journal_entry_lines jel INNER JOIN journal_entries je ON jel.journal_entry_id = je.id WHERE 1=1';
         $params = [];
         if ($dateFrom) {
             $query .= ' AND je.date >= ?';
@@ -112,7 +112,15 @@ class MariaDbJournalEntryLineRepository implements JournalEntryLineRepositoryInt
         $rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
         $lines = [];
         foreach ($rows as $row) {
-            $lines[] = new JournalEntryLine($row['id'], $row['journal_entry_id'], $row['account_id'], $row['debit'], $row['credit'], $row['description']);
+            $lines[] = new \Xerpia\Modules\Accounting\Domain\Entity\JournalEntryLine(
+                $row['id'],
+                $row['journal_entry_id'],
+                $row['account_id'],
+                $row['debit'],
+                $row['credit'],
+                $row['description'],
+                $row['date'] ?? null
+            );
         }
         return $lines;
     }
