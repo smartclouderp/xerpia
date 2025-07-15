@@ -102,6 +102,29 @@ xerpia es un sistema ERP modular, basado en arquitectura hexagonal, desarrollado
 
 - Preguntas frecuentes y solución de problemas comunes.
 
+## Desacoplamiento y estructura de archivos
+
+A partir de la versión 2025-07, el archivo `public/index.php` fue desacoplado para facilitar el mantenimiento y la escalabilidad. Ahora la lógica principal se divide en:
+
+- `public/index.php`: solo carga el entorno, dependencias, rutas y despacha la petición.
+- `config/dependencies.php`: define e instancia los controladores y repositorios principales.
+- `config/routes.php`: define las rutas principales y las asocia a los controladores.
+- `src/Core/Bootstrap/EnvLoader.php`: clase para cargar variables de entorno desde `.env`.
+- `src/Core/Bootstrap/Router.php`: clase para el enrutamiento y despacho de peticiones.
+- `src/Core/Bootstrap/JwtHelper.php`: clase para la verificación de JWT.
+
+**Ventajas:**
+- Cada módulo puede crecer de forma independiente.
+- El router y la autenticación son reutilizables y fáciles de testear.
+- Las dependencias y rutas se pueden modificar sin tocar el archivo principal.
+
+**Ejemplo de flujo:**
+1. `index.php` carga el entorno y la configuración.
+2. Instancia los controladores y rutas desde `config/`.
+3. Usa el router para despachar la petición y validar JWT si es necesario.
+
+Para detalles técnicos, revisa la sección de [Arquitectura hexagonal y patrones](./Arquitectura-Hexagonal.md).
+
 ---
 
 Para detalles de cada módulo, consulta las páginas específicas del Wiki.
