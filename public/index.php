@@ -1,9 +1,9 @@
+<?php
 use Xerpia\Modules\Product\Adapter\Web\ProductListController;
 use Xerpia\Modules\Product\Adapter\Web\UpdateProductController;
 use Xerpia\Modules\Product\Adapter\Web\DeleteProductController;
 use Xerpia\Modules\Product\Infrastructure\Persistence\MariaDbProductListRepository;
 use Xerpia\Modules\Product\Infrastructure\Persistence\MariaDbProductRepositoryExtended;
-<?php
 use Xerpia\Modules\Provider\Infrastructure\Persistence\MariaDbProviderListRepository;
 use Xerpia\Modules\Provider\Adapter\Web\ProviderListController;
 use Xerpia\Modules\Provider\Infrastructure\Persistence\MariaDbProviderRepositoryExtended;
