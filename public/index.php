@@ -1,235 +1,198 @@
-
 <?php
+
+require_once __DIR__ . '/../vendor/autoload.php';
+
+// Configuración y conexión
+use Xerpia\Core\Database\Connection;
+$config = require __DIR__ . '/../config/database.php';
+$db = new Connection($config['host'], $config['db'], $config['user'], $config['pass']);
+
+// Dependencias
+use Firebase\JWT\JWT;
+use Firebase\JWT\Key;
+
+// User
+use Xerpia\Modules\User\Infrastructure\Persistence\MariaDbUserRepository;
+use Xerpia\Modules\User\Infrastructure\Persistence\MariaDbUserWriteRepository;
+use Xerpia\Modules\User\Application\UseCase\LoginUser;
+use Xerpia\Modules\User\Application\UseCase\RegisterUser;
 use Xerpia\Modules\User\Application\UseCase\UpdateUser;
 use Xerpia\Modules\User\Application\UseCase\DeleteUser;
 use Xerpia\Modules\User\Application\UseCase\GetAllUsers;
 use Xerpia\Modules\User\Application\UseCase\GetUserById;
+use Xerpia\Modules\User\Adapter\Web\LoginController;
+use Xerpia\Modules\User\Adapter\Web\RegisterUserController;
 use Xerpia\Modules\User\Adapter\Web\UpdateUserController;
 use Xerpia\Modules\User\Adapter\Web\DeleteUserController;
 use Xerpia\Modules\User\Adapter\Web\GetAllUsersController;
 use Xerpia\Modules\User\Adapter\Web\GetUserByIdController;
-use Firebase\JWT\JWT;
-use Firebase\JWT\Key;
+
+// Product
+use Xerpia\Modules\Product\Infrastructure\Persistence\MariaDbProductRepository;
+use Xerpia\Modules\Product\Infrastructure\Persistence\MariaDbProductListRepository;
+use Xerpia\Modules\Product\Infrastructure\Persistence\MariaDbProductRepositoryExtended;
+use Xerpia\Modules\Product\Application\UseCase\RegisterProduct;
+use Xerpia\Modules\Product\Adapter\Web\ProductController;
 use Xerpia\Modules\Product\Adapter\Web\ProductListController;
 use Xerpia\Modules\Product\Adapter\Web\UpdateProductController;
 use Xerpia\Modules\Product\Adapter\Web\DeleteProductController;
-use Xerpia\Modules\Product\Infrastructure\Persistence\MariaDbProductListRepository;
-use Xerpia\Modules\Product\Infrastructure\Persistence\MariaDbProductRepositoryExtended;
-use Xerpia\Modules\Provider\Infrastructure\Persistence\MariaDbProviderListRepository;
-use Xerpia\Modules\Provider\Adapter\Web\ProviderListController;
-use Xerpia\Modules\Provider\Infrastructure\Persistence\MariaDbProviderRepositoryExtended;
-use Xerpia\Modules\Provider\Application\UseCase\UpdateProvider;
-use Xerpia\Modules\Provider\Adapter\Web\UpdateProviderController;
-use Xerpia\Modules\Provider\Application\UseCase\DeleteProvider;
-use Xerpia\Modules\Provider\Adapter\Web\DeleteProviderController;
-use Xerpia\Modules\Provider\Infrastructure\Persistence\MariaDbProviderReadRepository;
-use Xerpia\Modules\Provider\Adapter\Web\ProviderQueryController;
-// public/index.php
-require_once __DIR__ . '/../vendor/autoload.php';
 
-use Xerpia\Core\Database\Connection;
-
-$config = require __DIR__ . '/../config/database.php';
-$db = new Connection($config['host'], $config['db'], $config['user'], $config['pass']);
-
-
-// Instancias de módulos
-use Xerpia\Modules\User\Infrastructure\Persistence\MariaDbUserRepository;
-use Xerpia\Modules\User\Application\UseCase\LoginUser;
-use Xerpia\Modules\User\Adapter\Web\LoginController;
-
+// Provider
 use Xerpia\Modules\Provider\Infrastructure\Persistence\MariaDbProviderRepository;
+use Xerpia\Modules\Provider\Infrastructure\Persistence\MariaDbProviderRepositoryExtended;
+use Xerpia\Modules\Provider\Infrastructure\Persistence\MariaDbProviderReadRepository;
+use Xerpia\Modules\Provider\Infrastructure\Persistence\MariaDbProviderListRepository;
 use Xerpia\Modules\Provider\Application\UseCase\RegisterProvider;
+use Xerpia\Modules\Provider\Application\UseCase\UpdateProvider;
+use Xerpia\Modules\Provider\Application\UseCase\DeleteProvider;
 use Xerpia\Modules\Provider\Adapter\Web\RegisterProviderController;
+use Xerpia\Modules\Provider\Adapter\Web\UpdateProviderController;
+use Xerpia\Modules\Provider\Adapter\Web\DeleteProviderController;
+use Xerpia\Modules\Provider\Adapter\Web\ProviderQueryController;
+use Xerpia\Modules\Provider\Adapter\Web\ProviderListController;
 
-$jwtSecret = 'TU_SECRETO_JWT'; // Cambia por tu secreto real
+// Reports
+use Xerpia\Modules\Accounting\Adapter\Web\ReportsControllerFactory;
+use Xerpia\Modules\Accounting\Infrastructure\Persistence\MariaDbAccountRepository;
+use Xerpia\Modules\Accounting\Infrastructure\Persistence\MariaDbJournalEntryLineRepository;
+use Xerpia\Modules\Accounting\Application\UseCase\GetIncomeStatement;
+use Xerpia\Modules\Accounting\Adapter\Web\GetIncomeStatementController;
+
+// JWT
+$jwtSecret = 'TU_SECRETO_JWT';
+
+// Instancias Usuario
 $userRepository = new MariaDbUserRepository($db->getPdo());
+$userWriteRepository = new MariaDbUserWriteRepository($db->getPdo());
 $loginUser = new LoginUser($userRepository, $jwtSecret);
+$registerUser = new RegisterUser($userWriteRepository);
+$updateUser = new UpdateUser($userWriteRepository);
+$deleteUser = new DeleteUser($userWriteRepository);
+$getAllUsers = new GetAllUsers($userRepository);
+$getUserById = new GetUserById($userRepository);
+
+// Controllers Usuario
 $loginController = new LoginController($loginUser);
+$registerUserController = new RegisterUserController($registerUser);
+$updateUserController = new UpdateUserController($updateUser);
+$deleteUserController = new DeleteUserController($deleteUser);
+$getAllUsersController = new GetAllUsersController($getAllUsers);
+$getUserByIdController = new GetUserByIdController($getUserById);
 
-// Instancias para el módulo de proveedores
-$providerRepository = new MariaDbProviderRepository($db->getPdo());
-$registerProvider = new RegisterProvider($providerRepository);
-$registerProviderController = new RegisterProviderController($registerProvider);
-
-// Instancias para el módulo de productos
-$productRepository = new Xerpia\Modules\Product\Infrastructure\Persistence\MariaDbProductRepository($db->getPdo());
-$registerProduct = new Xerpia\Modules\Product\Application\UseCase\RegisterProduct($productRepository);
-$productController = new Xerpia\Modules\Product\Adapter\Web\ProductController($registerProduct);
-
-// Instancias para listar, actualizar y eliminar productos
+// Instancias Producto
+$productRepository = new MariaDbProductRepository($db->getPdo());
 $productListRepository = new MariaDbProductListRepository($db->getPdo());
-$productListController = new ProductListController($productListRepository);
 $productRepositoryExtended = new MariaDbProductRepositoryExtended($db->getPdo());
+$registerProduct = new RegisterProduct($productRepository);
+
+// Controllers Producto
+$productController = new ProductController($registerProduct);
+$productListController = new ProductListController($productListRepository);
 $updateProductController = new UpdateProductController($productRepositoryExtended);
 $deleteProductController = new DeleteProductController($productRepositoryExtended);
 
-// Instancias para consulta de proveedores
+// Instancias Proveedor
+$providerRepository = new MariaDbProviderRepository($db->getPdo());
+$providerRepositoryExtended = new MariaDbProviderRepositoryExtended($db->getPdo());
 $providerReadRepository = new MariaDbProviderReadRepository($db->getPdo());
-$providerQueryController = new ProviderQueryController($providerReadRepository);
-
-// Instancias para lista paginada y filtrada de proveedores
 $providerListRepository = new MariaDbProviderListRepository($db->getPdo());
+$registerProvider = new RegisterProvider($providerRepository);
+$updateProvider = new UpdateProvider($providerRepositoryExtended);
+$deleteProvider = new DeleteProvider($providerRepositoryExtended);
+
+// Controllers Proveedor
+$registerProviderController = new RegisterProviderController($registerProvider);
+$updateProviderController = new UpdateProviderController($updateProvider);
+$deleteProviderController = new DeleteProviderController($deleteProvider);
+$providerQueryController = new ProviderQueryController($providerReadRepository);
 $providerListController = new ProviderListController($providerListRepository);
 
-// Instancias para actualizar y eliminar proveedores
-$providerRepositoryExtended = new MariaDbProviderRepositoryExtended($db->getPdo());
-$updateProvider = new UpdateProvider($providerRepositoryExtended);
-$updateProviderController = new UpdateProviderController($updateProvider);
-$deleteProvider = new DeleteProvider($providerRepositoryExtended);
-$deleteProviderController = new DeleteProviderController($deleteProvider);
+// Controllers de reportes contables
+$reportsControllers = ReportsControllerFactory::create($db->getPdo());
 
-// Instancias para el registro de usuarios y roles
-$userWriteRepository = new Xerpia\Modules\User\Infrastructure\Persistence\MariaDbUserWriteRepository($db->getPdo());
-$registerUser = new Xerpia\Modules\User\Application\UseCase\RegisterUser($userWriteRepository);
-$registerUserController = new Xerpia\Modules\User\Adapter\Web\RegisterUserController($registerUser);
-
-// Instancias para update, delete, getAll, getById de usuarios
-$updateUser = new UpdateUser($userWriteRepository);
-$updateUserController = new UpdateUserController($updateUser);
-$deleteUser = new DeleteUser($userWriteRepository);
-$deleteUserController = new DeleteUserController($deleteUser);
-$getAllUsers = new GetAllUsers($userRepository);
-$getAllUsersController = new GetAllUsersController($getAllUsers);
-$getUserById = new GetUserById($userRepository);
-$getUserByIdController = new GetUserByIdController($getUserById);
-
-// Enrutador extensible
+// Rutas
 $routes = [
-    // Listar productos con paginación y filtros
-    'GET /products' => function($request) use ($productListController) {
-        return $productListController->list($request);
+    'POST /login' => fn($req) => $loginController->login($req),
+    'POST /users' => fn($req) => $registerUserController->register($req),
+    'PUT /users' => fn($req) => ($id = $req['id'] ?? 0) > 0
+        ? $updateUserController->update((int)$id, $req)
+        : ['status' => 400, 'body' => ['error' => 'Id de usuario requerido y válido']],
+    'DELETE /users' => fn($req) => ($id = $req['id'] ?? 0) > 0
+        ? $deleteUserController->delete((int)$id)
+        : ['status' => 400, 'body' => ['error' => 'Id de usuario requerido y válido']],
+    'GET /users' => fn() => $getAllUsersController->get(),
+    'GET /users/id' => fn($req) => ($id = $req['id'] ?? 0) > 0
+        ? $getUserByIdController->get((int)$id)
+        : ['status' => 400, 'body' => ['error' => 'Id de usuario requerido y válido']],
+    'POST /products' => fn($req) => $productController->register($req),
+    'GET /products' => fn($req) => $productListController->list($req),
+    'PUT /products' => fn($req) => $updateProductController->update($req),
+    'DELETE /products' => fn($req) => $deleteProductController->delete($req),
+    'POST /providers' => fn($req) => $registerProviderController->register($req),
+    'GET /providers' => fn($req) => $providerQueryController->get($req),
+    'GET /providers/list' => fn($req) => $providerListController->get($req),
+    'PUT /providers' => fn($req) => ($id = $req['id'] ?? 0) > 0
+        ? $updateProviderController->update((int)$id, $req)
+        : ['status' => 400, 'body' => ['error' => 'Id de proveedor requerido y válido']],
+    'DELETE /providers' => fn($req) => ($id = $req['id'] ?? 0) > 0
+        ? $deleteProviderController->delete((int)$id)
+        : ['status' => 400, 'body' => ['error' => 'Id de proveedor requerido y válido']],
+    'GET /reports/balance-sheet' => fn($req) => $reportsControllers['getBalanceSheetController']->get($req['date_to'] ?? null),
+    'GET /reports/general-ledger' => fn($req) => $reportsControllers['getGeneralLedgerController']->get(
+        isset($req['account_id']) ? (int)$req['account_id'] : null,
+        $req['date_from'] ?? null,
+        $req['date_to'] ?? null
+    ),
+    'GET /reports/transactions' => fn($req) => $reportsControllers['getTransactionsController']->get(
+        $req['date_from'] ?? null,
+        $req['date_to'] ?? null,
+        isset($req['account_id']) ? (int)$req['account_id'] : null,
+        isset($req['third_party_id']) ? (int)$req['third_party_id'] : null
+    ),
+    'GET /reports/income-statement' => function($req) use ($db) {
+        $accountRepo = new MariaDbAccountRepository($db->getPdo());
+        $lineRepo = new MariaDbJournalEntryLineRepository($db->getPdo());
+        $controller = new GetIncomeStatementController(new GetIncomeStatement($accountRepo, $lineRepo));
+        return $controller->__invoke([
+            'dateFrom' => $req['date_from'] ?? null,
+            'dateTo' => $req['date_to'] ?? null
+        ]);
     },
-    'POST /login' => function($request) use ($loginController) {
-        return $loginController->login($request);
-    },
-    'POST /products' => function($request) use ($productController) {
-        return $productController->register($request);
-    },
-    // Actualizar producto
-    'PUT /products' => function($request) use ($updateProductController) {
-        return $updateProductController->update($request);
-    },
-    // Eliminar producto
-    'DELETE /products' => function($request) use ($deleteProductController) {
-        return $deleteProductController->delete($request);
-    },
-    'POST /users' => function($request) use ($registerUserController) {
-        return $registerUserController->register($request);
-    },
-    // Actualizar usuario
-    'PUT /users' => function($request) use ($updateUserController) {
-        $id = isset($request['id']) ? (int)$request['id'] : 0;
-        if ($id <= 0) {
-            return [
-                'status' => 400,
-                'body' => ['error' => 'Id de usuario requerido y válido']
-            ];
-        }
-        return $updateUserController->update($id, $request);
-    },
-    // Eliminar usuario
-    'DELETE /users' => function($request) use ($deleteUserController) {
-        $id = isset($request['id']) ? (int)$request['id'] : 0;
-        if ($id <= 0) {
-            return [
-                'status' => 400,
-                'body' => ['error' => 'Id de usuario requerido y válido']
-            ];
-        }
-        return $deleteUserController->delete($id);
-    },
-    // Listar todos los usuarios
-    'GET /users' => function() use ($getAllUsersController) {
-        return $getAllUsersController->get();
-    },
-    // Obtener usuario por id
-    'GET /users/id' => function($request) use ($getUserByIdController) {
-        $id = isset($request['id']) ? (int)$request['id'] : 0;
-        if ($id <= 0) {
-            return [
-                'status' => 400,
-                'body' => ['error' => 'Id de usuario requerido y válido']
-            ];
-        }
-        return $getUserByIdController->get($id);
-    },
-    'POST /providers' => function($request) use ($registerProviderController) {
-        return $registerProviderController->register($request);
-    },
-    'GET /providers' => function($request) use ($providerQueryController) {
-        return $providerQueryController->get($request);
-    },
-    'GET /providers/list' => function($request) use ($providerListController) {
-        return $providerListController->get($request);
-    },
-    'PUT /providers' => function($request) use ($updateProviderController) {
-        $id = isset($request['id']) ? (int)$request['id'] : 0;
-        if ($id <= 0) {
-            return [
-                'status' => 400,
-                'body' => ['error' => 'Id de proveedor requerido y válido']
-            ];
-        }
-        return $updateProviderController->update($id, $request);
-    },
-    'DELETE /providers' => function($request) use ($deleteProviderController) {
-        $id = isset($request['id']) ? (int)$request['id'] : 0;
-        if ($id <= 0) {
-            return [
-                'status' => 400,
-                'body' => ['error' => 'Id de proveedor requerido y válido']
-            ];
-        }
-        return $deleteProviderController->delete($id);
-    },
-    // 'GET /transactions' => function($request) use ($transactionController) { ... },
 ];
 
-
-$method = $_SERVER['REQUEST_METHOD'];
-$scriptName = $_SERVER['SCRIPT_NAME'];
-$requestUri = strtok($_SERVER['REQUEST_URI'], '?');
-// Elimina la parte del script para obtener solo el endpoint
-$basePath = rtrim(dirname($scriptName), '/\\');
-$endpoint = $requestUri;
-if ($basePath && strpos($endpoint, $basePath) === 0) {
-    $endpoint = substr($endpoint, strlen($basePath));
-}
-$endpoint = str_replace('/index.php', '', $endpoint);
-$endpoint = rtrim($endpoint, '/');
-if ($endpoint === '') $endpoint = '/';
-$key = $method . ' ' . $endpoint;
-
-$requestBody = file_get_contents('php://input');
-$request = json_decode($requestBody, true) ?? [];
-
-// Función para verificar JWT
-function verify_jwt($jwtSecret) {
+// JWT
+function verify_jwt($jwtSecret): array|false {
     $headers = getallheaders();
-    if (!isset($headers['Authorization'])) {
+    if (!isset($headers['Authorization']) || !str_starts_with($headers['Authorization'], 'Bearer ')) {
         return false;
     }
-    $authHeader = $headers['Authorization'];
-    if (strpos($authHeader, 'Bearer ') !== 0) {
-        return false;
-    }
-    $jwt = trim(substr($authHeader, 7));
+    $jwt = trim(substr($headers['Authorization'], 7));
     try {
-        $decoded = JWT::decode($jwt, new Key($jwtSecret, 'HS256'));
-        return (array)$decoded;
+        return (array)JWT::decode($jwt, new Key($jwtSecret, 'HS256'));
     } catch (Exception $e) {
         return false;
     }
 }
 
-// Endpoints públicos (no requieren autenticación)
-$publicEndpoints = [
-    'POST /login',
-];
+// Enrutamiento
+$method = $_SERVER['REQUEST_METHOD'];
+$requestUri = strtok($_SERVER['REQUEST_URI'], '?');
+$scriptName = $_SERVER['SCRIPT_NAME'];
+$basePath = rtrim(dirname($scriptName), '/\\');
+$endpoint = str_replace('/index.php', '', $requestUri);
+if ($basePath && str_starts_with($endpoint, $basePath)) {
+    $endpoint = substr($endpoint, strlen($basePath));
+}
+$endpoint = rtrim($endpoint, '/') ?: '/';
+$key = "$method $endpoint";
+
+$requestBody = file_get_contents('php://input');
+$request = json_decode($requestBody, true) ?? [];
+
+// Autenticación para endpoints protegidos
+$publicEndpoints = ['POST /login'];
 
 if (isset($routes[$key])) {
-    // Verifica JWT si el endpoint no es público
     if (!in_array($key, $publicEndpoints)) {
         $jwtPayload = verify_jwt($jwtSecret);
         if (!$jwtPayload) {
@@ -238,12 +201,11 @@ if (isset($routes[$key])) {
             echo json_encode(['error' => 'Token inválido o ausente']);
             exit;
         }
-        // Puedes pasar $jwtPayload al controlador si lo necesitas
     }
     $response = $routes[$key]($request);
-    http_response_code($response['status']);
+    http_response_code($response['status'] ?? 200);
     header('Content-Type: application/json');
-    echo json_encode($response['body']);
+    echo json_encode($response['body'] ?? $response);
 } else {
     http_response_code(404);
     header('Content-Type: application/json');

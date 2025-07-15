@@ -64,4 +64,56 @@ class MariaDbJournalEntryLineRepository implements JournalEntryLineRepositoryInt
         }
         return $lines;
     }
+
+    public function findByAccountId(int $accountId, ?string $dateFrom = null, ?string $dateTo = null): array
+    {
+        $query = 'SELECT * FROM journal_entry_lines jel INNER JOIN journal_entries je ON jel.journal_entry_id = je.id WHERE jel.account_id = ?';
+        $params = [$accountId];
+        if ($dateFrom) {
+            $query .= ' AND je.date >= ?';
+            $params[] = $dateFrom;
+        }
+        if ($dateTo) {
+            $query .= ' AND je.date <= ?';
+            $params[] = $dateTo;
+        }
+        $stmt = $this->pdo->prepare($query);
+        $stmt->execute($params);
+        $rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
+        $lines = [];
+        foreach ($rows as $row) {
+            $lines[] = new JournalEntryLine($row['id'], $row['journal_entry_id'], $row['account_id'], $row['debit'], $row['credit'], $row['description']);
+        }
+        return $lines;
+    }
+
+    public function findByFilters(?string $dateFrom = null, ?string $dateTo = null, ?int $accountId = null, ?int $thirdPartyId = null): array
+    {
+        $query = 'SELECT jel.* FROM journal_entry_lines jel INNER JOIN journal_entries je ON jel.journal_entry_id = je.id WHERE 1=1';
+        $params = [];
+        if ($dateFrom) {
+            $query .= ' AND je.date >= ?';
+            $params[] = $dateFrom;
+        }
+        if ($dateTo) {
+            $query .= ' AND je.date <= ?';
+            $params[] = $dateTo;
+        }
+        if ($accountId) {
+            $query .= ' AND jel.account_id = ?';
+            $params[] = $accountId;
+        }
+        if ($thirdPartyId) {
+            $query .= ' AND je.third_party_id = ?';
+            $params[] = $thirdPartyId;
+        }
+        $stmt = $this->pdo->prepare($query);
+        $stmt->execute($params);
+        $rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
+        $lines = [];
+        foreach ($rows as $row) {
+            $lines[] = new JournalEntryLine($row['id'], $row['journal_entry_id'], $row['account_id'], $row['debit'], $row['credit'], $row['description']);
+        }
+        return $lines;
+    }
 }

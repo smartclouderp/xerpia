@@ -9,8 +9,9 @@ class JournalEntryLine
     private float $debit;
     private float $credit;
     private ?string $description;
+    private ?string $date;
 
-    public function __construct(int $id, int $journalEntryId, int $accountId, float $debit, float $credit, ?string $description = null)
+    public function __construct(int $id, int $journalEntryId, int $accountId, float $debit, float $credit, ?string $description = null, ?string $date = null)
     {
         $this->id = $id;
         $this->journalEntryId = $journalEntryId;
@@ -18,6 +19,7 @@ class JournalEntryLine
         $this->debit = $debit;
         $this->credit = $credit;
         $this->description = $description;
+        $this->date = $date;
     }
 
     public function getId(): int { return $this->id; }
@@ -26,4 +28,5 @@ class JournalEntryLine
     public function getDebit(): float { return $this->debit; }
     public function getCredit(): float { return $this->credit; }
     public function getDescription(): ?string { return $this->description; }
+    public function getDate(): ?string { return $this->date; }
 }
