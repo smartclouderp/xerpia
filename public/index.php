@@ -1,4 +1,13 @@
+
 <?php
+
+require_once __DIR__ . '/../vendor/autoload.php';
+
+// Cargar .env si existe
+if (file_exists(__DIR__ . '/../.env')) {
+    $dotenv = Dotenv\Dotenv::createImmutable(__DIR__ . '/../');
+    $dotenv->load();
+}
 
 require_once __DIR__ . '/../vendor/autoload.php';
 
@@ -111,7 +120,10 @@ $providerListController = new ProviderListController($providerListRepository);
 $reportsControllers = ReportsControllerFactory::create($db->getPdo());
 
 // Rutas
-$routes = [
+if (!isset($routesSwagger) || !is_array($routesSwagger)) {
+    $routesSwagger = [];
+}
+$routes = array_merge($routesSwagger, [
     'POST /login' => fn($req) => $loginController->login($req),
     'POST /users' => fn($req) => $registerUserController->register($req),
     'PUT /users' => fn($req) => ($id = $req['id'] ?? 0) > 0
@@ -158,7 +170,7 @@ $routes = [
             'dateTo' => $req['date_to'] ?? null
         ]);
     },
-];
+]);
 
 // JWT
 function verify_jwt($jwtSecret): array|false {

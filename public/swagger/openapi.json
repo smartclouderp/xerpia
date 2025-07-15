@@ -1,0 +1,75 @@
+{
+  "openapi": "3.0.1",
+  "info": {
+    "title": "Xerpia ERP API",
+    "version": "1.0.0",
+    "description": "Documentación de la API principal de Xerpia ERP."
+  },
+  "servers": [
+    { "url": "/xerpia/public/" }
+  ],
+  "paths": {
+    "/login": {
+      "post": {
+        "summary": "Login de usuario",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "username": { "type": "string" },
+                  "password": { "type": "string" }
+                },
+                "required": ["username", "password"]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Token JWT generado"
+          }
+        }
+      }
+    },
+    "/reports/balance-sheet": {
+      "get": {
+        "summary": "Consultar balance general",
+        "parameters": [
+          {
+            "name": "date_to",
+            "in": "query",
+            "schema": { "type": "string", "format": "date" },
+            "required": false
+          }
+        ],
+        "responses": {
+          "200": { "description": "Balance general" }
+        },
+        "security": [{ "bearerAuth": [] }]
+      }
+    },
+    "/reports/income-statement": {
+      "get": {
+        "summary": "Consultar estado de resultados",
+        "parameters": [
+          { "name": "date_from", "in": "query", "schema": { "type": "string", "format": "date" }, "required": false },
+          { "name": "date_to", "in": "query", "schema": { "type": "string", "format": "date" }, "required": false }
+        ],
+        "responses": { "200": { "description": "Estado de resultados" } },
+        "security": [{ "bearerAuth": [] }]
+      }
+    }
+  },
+  "components": {
+    "securitySchemes": {
+      "bearerAuth": {
+        "type": "http",
+        "scheme": "bearer",
+        "bearerFormat": "JWT"
+      }
+    }
+  }
+}

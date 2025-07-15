@@ -1,5 +1,10 @@
 RewriteEngine On
 
+# Permitir acceso directo a archivos estáticos en /swagger/
+RewriteCond %{REQUEST_URI} ^/swagger/ [NC]
+RewriteCond %{REQUEST_FILENAME} -f
+RewriteRule ^ - [L]
+
 # Si el archivo o directorio no existe, redirige a index.php
 RewriteCond %{REQUEST_FILENAME} !-f
 RewriteCond %{REQUEST_FILENAME} !-d
