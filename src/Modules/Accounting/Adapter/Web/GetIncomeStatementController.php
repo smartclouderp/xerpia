@@ -12,12 +12,12 @@ class GetIncomeStatementController
         $this->useCase = $useCase;
     }
 
-    public function __invoke($request)
+    public function get(?string $dateFrom = null, ?string $dateTo = null): array
     {
-        $dateFrom = $request['dateFrom'] ?? null;
-        $dateTo = $request['dateTo'] ?? null;
         $result = $this->useCase->execute($dateFrom, $dateTo);
-        header('Content-Type: application/json');
-        echo json_encode($result);
+        return [
+            'status' => 200,
+            'body' => $result
+        ];
     }
 }

@@ -18,6 +18,7 @@ class ReportsControllerFactory
             'getBalanceSheetController' => new GetBalanceSheetController(new GetBalanceSheet($accountRepo, $lineRepo)),
             'getGeneralLedgerController' => new GetGeneralLedgerController(new GetGeneralLedger($accountRepo, $lineRepo)),
             'getTransactionsController' => new GetTransactionsController(new GetTransactions($lineRepo)),
+            'getIncomeStatementController' => new GetIncomeStatementController(new GetIncomeStatement($accountRepo, $lineRepo)),
         ];
     }
 
