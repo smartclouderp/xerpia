@@ -6,6 +6,63 @@ use Xerpia\Modules\Accounting\Domain\Repository\TransactionRepositoryInterface;
 use PDO;
 
 class MariaDbTransactionRepository implements TransactionRepositoryInterface {
+    public function getPdo(): PDO {
+        return $this->pdo;
+    }
+    public function findByThirdPartyAndDateRange($third_party_id, $date_from = null, $date_to = null): array {
+        $sql = 'SELECT * FROM transactions WHERE third_party_id = ?';
+        $params = [$third_party_id];
+        if ($date_from) {
+            $sql .= ' AND date >= ?';
+            $params[] = $date_from;
+        }
+        if ($date_to) {
+            $sql .= ' AND date <= ?';
+            $params[] = $date_to;
+        }
+        $sql .= ' ORDER BY date ASC';
+        $stmt = $this->pdo->prepare($sql);
+        $stmt->execute($params);
+        $transactions = [];
+        while ($row = $stmt->fetch()) {
+            $transactions[] = [
+                'id' => $row['id'],
+                'amount' => $row['amount'],
+                'description' => $row['description'],
+                'date' => $row['date'],
+                'account_id' => $row['account_id'] ?? null,
+                'third_party_id' => $row['third_party_id'] ?? null
+            ];
+        }
+        return $transactions;
+    }
+    public function findAllByDateRange($date_from = null, $date_to = null): array {
+        $sql = 'SELECT * FROM transactions WHERE 1=1';
+        $params = [];
+        if ($date_from) {
+            $sql .= ' AND date >= ?';
+            $params[] = $date_from;
+        }
+        if ($date_to) {
+            $sql .= ' AND date <= ?';
+            $params[] = $date_to;
+        }
+        $sql .= ' ORDER BY date ASC';
+        $stmt = $this->pdo->prepare($sql);
+        $stmt->execute($params);
+        $transactions = [];
+        while ($row = $stmt->fetch()) {
+            $transactions[] = [
+                'id' => $row['id'],
+                'amount' => $row['amount'],
+                'description' => $row['description'],
+                'date' => $row['date'],
+                'account_id' => $row['account_id'] ?? null,
+                'third_party_id' => $row['third_party_id'] ?? null
+            ];
+        }
+        return $transactions;
+    }
     private PDO $pdo;
 
     public function __construct(PDO $pdo) {

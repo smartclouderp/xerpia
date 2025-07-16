@@ -10,11 +10,22 @@ class TransactionController {
         $this->registerTransaction = $registerTransaction;
     }
 
-    public function register(array $data): void {
-        $amount = $data['amount'];
-        $description = $data['description'];
-        $date = new \DateTime($data['date']);
-        $this->registerTransaction->execute($amount, $description, $date);
-        echo "Transacción registrada";
+    public function register(array $data)
+    {
+        try {
+            $amount = $data['amount'];
+            $description = $data['description'];
+            $date = new \DateTime($data['date']);
+            $this->registerTransaction->execute($amount, $description, $date);
+            return [
+                'status' => 201,
+                'body' => ['message' => 'Transacción registrada']
+            ];
+        } catch (\Exception $e) {
+            return [
+                'status' => 400,
+                'body' => ['error' => $e->getMessage()]
+            ];
+        }
     }
 }
