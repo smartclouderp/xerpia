@@ -37,4 +37,12 @@ class MariaDbPeriodRepository implements PeriodRepositoryInterface
         $stmt = $this->pdo->prepare('UPDATE periods SET status = "closed" WHERE id = ?');
         $stmt->execute([$id]);
     }
+    public function findById(int $id): ?Period
+    {
+        $stmt = $this->pdo->prepare('SELECT * FROM periods WHERE id = ? LIMIT 1');
+        $stmt->execute([$id]);
+        $row = $stmt->fetch();
+        if (!$row) return null;
+        return new Period($row['id'], $row['name'], $row['date_from'], $row['date_to'], $row['status']);
+    }
 }

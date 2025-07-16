@@ -24,22 +24,31 @@ class ExportReportController
         $transactions = $this->transactionRepository->findAllByDateRange($date_from, $date_to);
         switch (strtolower($format)) {
             case 'csv':
-                $filename = 'journal_report.csv';
-                $fp = fopen('php://temp', 'w+');
-                fputcsv($fp, ['ID', 'Monto', 'Descripción', 'Fecha', 'Cuenta', 'Tercero']);
+                $csv = "ID,Monto,Descripción,Fecha,Cuenta,Tercero\n";
                 foreach ($transactions as $tx) {
-                    fputcsv($fp, [$tx['id'], $tx['amount'], $tx['description'], $tx['date'], $tx['account_id'], $tx['third_party_id']]);
+                    $csv .= sprintf("%d,%.2f,%s,%s,%d,%s\n",
+                        $tx['id'], $tx['amount'], $tx['description'], $tx['date'], $tx['account_id'], $tx['third_party_id'] ?? ''
+                    );
                 }
-                rewind($fp);
-                $csv = stream_get_contents($fp);
-                fclose($fp);
                 return [
                     'status' => 200,
+                    'body' => [
+                        'encabezado' => ['ID','Monto','Descripción','Fecha','Cuenta','Tercero'],
+                        'datos' => array_map(function($tx) {
+                            return [
+                                'ID' => $tx['id'],
+                                'Monto' => $tx['amount'],
+                                'Descripción' => $tx['description'],
+                                'Fecha' => $tx['date'],
+                                'Cuenta' => $tx['account_id'],
+                                'Tercero' => $tx['third_party_id']
+                            ];
+                        }, $transactions)
+                    ],
                     'headers' => [
                         'Content-Type' => 'text/csv',
-                        'Content-Disposition' => 'attachment; filename="'.$filename.'"'
-                    ],
-                    'body' => $csv
+                        'Content-Disposition' => 'attachment; filename="reporte.csv"'
+                    ]
                 ];
             case 'xlsx':
                 // Requiere PhpSpreadsheet

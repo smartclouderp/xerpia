@@ -83,6 +83,11 @@ return function($controllers, $reportsControllers) {
         },
         // ...otras rutas...
         'GET /reports/balance-sheet' => fn($req) => $reportsControllers['getBalanceSheetController']->get($req['date_to'] ?? null),
+        'GET /reports/account-movements' => fn($req) => $controllers['getAccountMovementsReportController']->get($req),
+        'GET /reports/export' => function($req) use ($controllers) {
+            $format = $req['format'] ?? 'csv';
+            return $controllers['exportReportController']->export($format, $req);
+        },
         'GET /reports/general-ledger' => fn($req) => $reportsControllers['getGeneralLedgerController']->get(
             isset($req['account_id']) ? (int)$req['account_id'] : null,
             $req['date_from'] ?? null,
@@ -106,6 +111,7 @@ return function($controllers, $reportsControllers) {
         'GET /periods' => fn() => $controllers['listPeriodsController']->list(),
         'POST /periods/close' => fn($req) => $controllers['closePeriodController']->close($req),
         'GET /periods/validate-date' => fn($req) => $controllers['validateDateInOpenPeriodController']->validate($req['date'] ?? null),
+        'GET /reports/period-close' => fn($req) => $controllers['getPeriodCloseReportController']->get($req),
         // ...rutas de reportes...
     ];
         /**

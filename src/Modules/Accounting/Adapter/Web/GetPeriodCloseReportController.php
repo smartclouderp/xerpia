@@ -22,6 +22,9 @@ class GetPeriodCloseReportController
      */
     public function get($period_id)
     {
+        if (is_array($period_id)) {
+            $period_id = isset($period_id['period_id']) ? (int)$period_id['period_id'] : 0;
+        }
         $period = $this->periodRepository->findById($period_id);
         if (!$period) {
             return [
@@ -29,18 +32,34 @@ class GetPeriodCloseReportController
                 'body' => ['error' => 'Periodo no encontrado']
             ];
         }
-        $transactions = $this->transactionRepository->findAllByDateRange($period['date_from'], $period['date_to']);
+        $transactions = $this->transactionRepository->findAllByDateRange($period->getDateFrom(), $period->getDateTo());
         $total = 0;
+        $formatted = [];
         foreach ($transactions as $tx) {
             $total += $tx['amount'];
+            $formatted[] = [
+                'ID' => $tx['id'],
+                'Monto' => $tx['amount'],
+                'Descripción' => $tx['description'],
+                'Fecha' => $tx['date'],
+                'Cuenta' => $tx['account_id'],
+                'Tercero' => $tx['third_party_id']
+            ];
         }
         return [
             'status' => 200,
             'body' => [
-                'period' => $period,
+                'period' => [
+                    'id' => $period->getId(),
+                    'name' => $period->getName(),
+                    'date_from' => $period->getDateFrom(),
+                    'date_to' => $period->getDateTo(),
+                    'status' => $period->getStatus()
+                ],
                 'total_movimientos' => count($transactions),
                 'total' => $total,
-                'movimientos' => $transactions
+                'encabezado' => ['ID','Monto','Descripción','Fecha','Cuenta','Tercero'],
+                'movimientos' => $formatted
             ]
         ];
     }

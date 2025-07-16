@@ -1,0 +1,233 @@
+{
+  "info": {
+    "name": "Xerpia ERP API",
+    "description": "Colección de endpoints para pruebas y documentación de la API Xerpia ERP.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "version": "2025-07-16"
+  },
+  "item": [
+    {
+      "name": "Login",
+      "request": {
+        "method": "POST",
+        "header": [{"key": "Content-Type", "value": "application/json"}],
+        "url": {"raw": "{{base_url}}/login", "host": ["{{base_url}}"], "path": ["login"]},
+        "body": {"mode": "raw", "raw": "{\n  \"username\": \"admin\",\n  \"password\": \"admin123\"\n}"}
+      }
+    },
+    {
+      "name": "Usuarios",
+      "item": [
+        {
+          "name": "Registrar usuario",
+          "request": {
+            "method": "POST",
+            "header": [{"key": "Content-Type", "value": "application/json"}],
+            "url": {"raw": "{{base_url}}/users", "host": ["{{base_url}}"], "path": ["users"]},
+            "body": {"mode": "raw", "raw": "{\n  \"username\": \"nuevo\",\n  \"password\": \"123456\",\n  \"email\": \"nuevo@xerpia.com\"\n}"}
+          }
+        },
+        {
+          "name": "Listar usuarios",
+          "request": {
+            "method": "GET",
+            "header": [{"key": "Authorization", "value": "Bearer {{jwt}}"}],
+            "url": {"raw": "{{base_url}}/users", "host": ["{{base_url}}"], "path": ["users"]}
+          }
+        },
+        {
+          "name": "Obtener usuario por ID",
+          "request": {
+            "method": "GET",
+            "header": [{"key": "Authorization", "value": "Bearer {{jwt}}"}],
+            "url": {"raw": "{{base_url}}/users/1", "host": ["{{base_url}}"], "path": ["users", "1"]}
+          }
+        },
+        {
+          "name": "Actualizar usuario",
+          "request": {
+            "method": "PUT",
+            "header": [{"key": "Authorization", "value": "Bearer {{jwt}}"}, {"key": "Content-Type", "value": "application/json"}],
+            "url": {"raw": "{{base_url}}/users", "host": ["{{base_url}}"], "path": ["users"]},
+            "body": {"mode": "raw", "raw": "{\n  \"id\": 1,\n  \"email\": \"actualizado@xerpia.com\"\n}"}
+          }
+        },
+        {
+          "name": "Eliminar usuario",
+          "request": {
+            "method": "DELETE",
+            "header": [{"key": "Authorization", "value": "Bearer {{jwt}}"}],
+            "url": {"raw": "{{base_url}}/users", "host": ["{{base_url}}"], "path": ["users"]},
+            "body": {"mode": "raw", "raw": "{\n  \"id\": 1\n}"}
+          }
+        }
+      ]
+    },
+    {
+      "name": "Productos",
+      "item": [
+        {
+          "name": "Registrar producto",
+          "request": {
+            "method": "POST",
+            "header": [{"key": "Authorization", "value": "Bearer {{jwt}}"}, {"key": "Content-Type", "value": "application/json"}],
+            "url": {"raw": "{{base_url}}/products", "host": ["{{base_url}}"], "path": ["products"]},
+            "body": {"mode": "raw", "raw": "{\n  \"name\": \"Producto demo\",\n  \"price\": 100\n}"}
+          }
+        },
+        {
+          "name": "Listar productos",
+          "request": {
+            "method": "GET",
+            "header": [{"key": "Authorization", "value": "Bearer {{jwt}}"}],
+            "url": {"raw": "{{base_url}}/products", "host": ["{{base_url}}"], "path": ["products"]}
+          }
+        },
+        {
+          "name": "Actualizar producto",
+          "request": {
+            "method": "PUT",
+            "header": [{"key": "Authorization", "value": "Bearer {{jwt}}"}, {"key": "Content-Type", "value": "application/json"}],
+            "url": {"raw": "{{base_url}}/products", "host": ["{{base_url}}"], "path": ["products"]},
+            "body": {"mode": "raw", "raw": "{\n  \"id\": 1,\n  \"price\": 150\n}"}
+          }
+        },
+        {
+          "name": "Eliminar producto",
+          "request": {
+            "method": "DELETE",
+            "header": [{"key": "Authorization", "value": "Bearer {{jwt}}"}],
+            "url": {"raw": "{{base_url}}/products", "host": ["{{base_url}}"], "path": ["products"]},
+            "body": {"mode": "raw", "raw": "{\n  \"id\": 1\n}"}
+          }
+        }
+      ]
+    },
+    {
+      "name": "Proveedores",
+      "item": [
+        {
+          "name": "Registrar proveedor",
+          "request": {
+            "method": "POST",
+            "header": [{"key": "Authorization", "value": "Bearer {{jwt}}"}, {"key": "Content-Type", "value": "application/json"}],
+            "url": {"raw": "{{base_url}}/providers", "host": ["{{base_url}}"], "path": ["providers"]},
+            "body": {"mode": "raw", "raw": "{\n  \"name\": \"Proveedor demo\"\n}"}
+          }
+        },
+        {
+          "name": "Consultar proveedor",
+          "request": {
+            "method": "GET",
+            "header": [{"key": "Authorization", "value": "Bearer {{jwt}}"}],
+            "url": {"raw": "{{base_url}}/providers?id=1", "host": ["{{base_url}}"], "path": ["providers"], "query": [{"key": "id", "value": "1"}]}
+          }
+        },
+        {
+          "name": "Listar proveedores",
+          "request": {
+            "method": "GET",
+            "header": [{"key": "Authorization", "value": "Bearer {{jwt}}"}],
+            "url": {"raw": "{{base_url}}/providers/list", "host": ["{{base_url}}"], "path": ["providers", "list"]}
+          }
+        },
+        {
+          "name": "Actualizar proveedor",
+          "request": {
+            "method": "PUT",
+            "header": [{"key": "Authorization", "value": "Bearer {{jwt}}"}, {"key": "Content-Type", "value": "application/json"}],
+            "url": {"raw": "{{base_url}}/providers", "host": ["{{base_url}}"], "path": ["providers"]},
+            "body": {"mode": "raw", "raw": "{\n  \"id\": 1,\n  \"name\": \"Proveedor actualizado\"\n}"}
+          }
+        },
+        {
+          "name": "Eliminar proveedor",
+          "request": {
+            "method": "DELETE",
+            "header": [{"key": "Authorization", "value": "Bearer {{jwt}}"}],
+            "url": {"raw": "{{base_url}}/providers", "host": ["{{base_url}}"], "path": ["providers"]},
+            "body": {"mode": "raw", "raw": "{\n  \"id\": 1\n}"}
+          }
+        }
+      ]
+    },
+    {
+      "name": "Periodos contables",
+      "item": [
+        {
+          "name": "Crear periodo",
+          "request": {
+            "method": "POST",
+            "header": [{"key": "Authorization", "value": "Bearer {{jwt}}"}, {"key": "Content-Type", "value": "application/json"}],
+            "url": {"raw": "{{base_url}}/periods", "host": ["{{base_url}}"], "path": ["periods"]},
+            "body": {"mode": "raw", "raw": "{\n  \"start_date\": \"2025-01-01\",\n  \"end_date\": \"2025-12-31\"\n}"}
+          }
+        },
+        {
+          "name": "Listar periodos",
+          "request": {
+            "method": "GET",
+            "header": [{"key": "Authorization", "value": "Bearer {{jwt}}"}],
+            "url": {"raw": "{{base_url}}/periods", "host": ["{{base_url}}"], "path": ["periods"]}
+          }
+        },
+        {
+          "name": "Cerrar periodo",
+          "request": {
+            "method": "POST",
+            "header": [{"key": "Authorization", "value": "Bearer {{jwt}}"}, {"key": "Content-Type", "value": "application/json"}],
+            "url": {"raw": "{{base_url}}/periods/close", "host": ["{{base_url}}"], "path": ["periods", "close"]},
+            "body": {"mode": "raw", "raw": "{\n  \"id\": 1\n}"}
+          }
+        },
+        {
+          "name": "Validar fecha en periodo abierto",
+          "request": {
+            "method": "GET",
+            "header": [{"key": "Authorization", "value": "Bearer {{jwt}}"}],
+            "url": {"raw": "{{base_url}}/periods/validate-date?date=2025-07-16", "host": ["{{base_url}}"], "path": ["periods", "validate-date"], "query": [{"key": "date", "value": "2025-07-16"}]}
+          }
+        }
+      ]
+    },
+    {
+      "name": "Transacciones contables",
+      "item": [
+        {
+          "name": "Registrar transacción",
+          "request": {
+            "method": "POST",
+            "header": [{"key": "Authorization", "value": "Bearer {{jwt}}"}, {"key": "Content-Type", "value": "application/json"}],
+            "url": {"raw": "{{base_url}}/transactions", "host": ["{{base_url}}"], "path": ["transactions"]},
+            "body": {"mode": "raw", "raw": "{\n  \"date\": \"2025-07-16\",\n  \"amount\": 1000,\n  \"account_id\": 1,\n  \"description\": \"Pago factura\"\n}"}
+          }
+        }
+      ]
+    },
+    {
+      "name": "Reportes contables",
+      "item": [
+        {
+          "name": "Balance general",
+          "request": {"method": "GET", "header": [{"key": "Authorization", "value": "Bearer {{jwt}}"}], "url": {"raw": "{{base_url}}/reports/balance-sheet", "host": ["{{base_url}}"], "path": ["reports", "balance-sheet"]}}
+        },
+        {"name": "Libro mayor", "request": {"method": "GET", "header": [{"key": "Authorization", "value": "Bearer {{jwt}}"}], "url": {"raw": "{{base_url}}/reports/general-ledger", "host": ["{{base_url}}"], "path": ["reports", "general-ledger"]}}},
+        {"name": "Listado de transacciones", "request": {"method": "GET", "header": [{"key": "Authorization", "value": "Bearer {{jwt}}"}], "url": {"raw": "{{base_url}}/reports/transactions", "host": ["{{base_url}}"], "path": ["reports", "transactions"]}}},
+        {"name": "Estado de resultados", "request": {"method": "GET", "header": [{"key": "Authorization", "value": "Bearer {{jwt}}"}], "url": {"raw": "{{base_url}}/reports/income-statement", "host": ["{{base_url}}"], "path": ["reports", "income-statement"]}}},
+        {"name": "Libro diario", "request": {"method": "GET", "header": [{"key": "Authorization", "value": "Bearer {{jwt}}"}], "url": {"raw": "{{base_url}}/reports/journal", "host": ["{{base_url}}"], "path": ["reports", "journal"]}}},
+        {"name": "Informe por tercero", "request": {"method": "GET", "header": [{"key": "Authorization", "value": "Bearer {{jwt}}"}], "url": {"raw": "{{base_url}}/reports/third-party", "host": ["{{base_url}}"], "path": ["reports", "third-party"]}}},
+        {"name": "Cuentas por cobrar", "request": {"method": "GET", "header": [{"key": "Authorization", "value": "Bearer {{jwt}}"}], "url": {"raw": "{{base_url}}/reports/accounts-receivable", "host": ["{{base_url}}"], "path": ["reports", "accounts-receivable"]}}},
+        {"name": "Cuentas por pagar", "request": {"method": "GET", "header": [{"key": "Authorization", "value": "Bearer {{jwt}}"}], "url": {"raw": "{{base_url}}/reports/accounts-payable", "host": ["{{base_url}}"], "path": ["reports", "accounts-payable"]}}},
+        {"name": "Informe de impuestos", "request": {"method": "GET", "header": [{"key": "Authorization", "value": "Bearer {{jwt}}"}], "url": {"raw": "{{base_url}}/reports/tax", "host": ["{{base_url}}"], "path": ["reports", "tax"]}}},
+        {"name": "Flujo de efectivo", "request": {"method": "GET", "header": [{"key": "Authorization", "value": "Bearer {{jwt}}"}], "url": {"raw": "{{base_url}}/reports/cash-flow", "host": ["{{base_url}}"], "path": ["reports", "cash-flow"]}}},
+        {"name": "Movimientos por cuenta", "request": {"method": "GET", "header": [{"key": "Authorization", "value": "Bearer {{jwt}}"}], "url": {"raw": "{{base_url}}/reports/account-movements", "host": ["{{base_url}}"], "path": ["reports", "account-movements"]}}},
+        {"name": "Cierre de periodo", "request": {"method": "GET", "header": [{"key": "Authorization", "value": "Bearer {{jwt}}"}], "url": {"raw": "{{base_url}}/reports/period-close", "host": ["{{base_url}}"], "path": ["reports", "period-close"]}}},
+        {"name": "Exportación fiscal (CSV, Excel, PDF)", "request": {"method": "GET", "header": [{"key": "Authorization", "value": "Bearer {{jwt}}"}], "url": {"raw": "{{base_url}}/reports/export?format=csv", "host": ["{{base_url}}"], "path": ["reports", "export"], "query": [{"key": "format", "value": "csv"}]}}}
+      ]
+    }
+  ],
+  "variable": [
+    {"key": "base_url", "value": "http://localhost:8080"},
+    {"key": "jwt", "value": ""}
+  ]
+}
