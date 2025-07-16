@@ -35,6 +35,7 @@ return function($controllers, $reportsControllers) {
      *                   type: string
      */
     return [
+        'POST /users' => fn($req) => $controllers['registerUserController']->register($req),
         'POST /login' => fn($req) => $controllers['loginController']->login($req),
         'PUT /users' => function($req) use ($controllers) {
             $id = $req['id'] ?? 0;

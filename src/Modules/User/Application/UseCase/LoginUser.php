@@ -19,6 +19,13 @@ class LoginUser
     public function execute(string $username, string $password): ?string
     {
         $user = $this->userRepository->findByUsername($username);
+        error_log('LoginUser::execute username: ' . $username);
+        if ($user) {
+            error_log('LoginUser::execute hash: ' . $user->getPasswordHash());
+            error_log('LoginUser::execute password_verify: ' . (password_verify($password, $user->getPasswordHash()) ? 'true' : 'false'));
+        } else {
+            error_log('LoginUser::execute user not found');
+        }
         if (!$user || !password_verify($password, $user->getPasswordHash())) {
             return null;
         }
